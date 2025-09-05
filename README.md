@@ -1,6 +1,64 @@
 # DevelopsToday NestJS Project
 
 
+## Overview
+This project is a NestJS server-side application using PostgreSQL as the database. It is set up for local development with Docker and Prisma ORM.
+
+## Prerequisites
+- [Node.js](https://nodejs.org/) (v24)
+- [npm](https://www.npmjs.com/)
+- [Docker](https://www.docker.com/) (for local PostgreSQL)
+
+## Getting Started
+
+### 1. Start PostgreSQL with Docker Compose
+Run the following command to start a local PostgreSQL instance:
+
+```bash
+docker compose up -d
+```
+
+This uses the configuration in `docker-compose.yml` and exposes the database on `localhost:5432`.
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Run Database Migrations
+
+```bash
+npx prisma migrate deploy
+```
+
+### 4. Generating prisma client
+```bash
+npx prisma generate
+```
+
+### 5. Seed Testing Data
+
+```bash
+npm run seed
+```
+This will add a test user (id=1) and a couple of calendar events for him.
+
+### 6. Start the Application
+
+- For development (with hot reload):
+  ```bash
+  npm run start:dev
+  ```
+- For production:
+  ```bash
+  npm run start:prod
+  ```
+
+The application will connect to the database started by Docker Compose.
+
+
+
 ## API Documentation
 
 ### Base URL
@@ -99,62 +157,6 @@ Get country info:
 ```bash
 curl http://localhost:3000/api/countries/US
 ```
-
-## Overview
-This project is a NestJS server-side application using PostgreSQL as the database. It is set up for local development with Docker and Prisma ORM.
-
-## Prerequisites
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- [npm](https://www.npmjs.com/)
-- [Docker](https://www.docker.com/) (for local PostgreSQL)
-
-## Getting Started
-
-### 1. Start PostgreSQL with Docker Compose
-Run the following command to start a local PostgreSQL instance:
-
-```bash
-docker compose up -d
-```
-
-This uses the configuration in `docker-compose.yml` and exposes the database on `localhost:5432`.
-
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Run Database Migrations
-
-```bash
-npx prisma migrate deploy
-```
-
-### 4. Generating prisma client
-```bash
-npx prisma generate
-```
-
-### 5. Seed Testing Data
-
-```bash
-npm run seed
-```
-This will add a test user (id=1) and a couple of calendar events for him.
-
-### 6. Start the Application
-
-- For development (with hot reload):
-  ```bash
-  npm run start:dev
-  ```
-- For production:
-  ```bash
-  npm run start:prod
-  ```
-
-The application will connect to the database started by Docker Compose.
 
 ## Notes
 - The database data is persisted in the `postgres_data/` directory.
