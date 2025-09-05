@@ -1,12 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { AddHolidaysDto } from './dto/add-holidays.dto';
 import { CalendarService } from './calendar/calendar.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly calendarService: CalendarService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly calendarService: CalendarService,
+  ) {}
+
+  async getUserById(userId: number) {
+    return this.prisma.user.findUnique({ where: { id: userId } });
+  }
 
   async addHolidaysToCalendar(userId: number, dto: AddHolidaysDto) {
+    const user = await this.getUserById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return this.calendarService.addHolidays(userId, dto);
   }
 }
