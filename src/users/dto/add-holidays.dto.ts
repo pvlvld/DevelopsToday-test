@@ -1,14 +1,17 @@
-import { IsString, IsArray, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsOptional,
+  IsISO31661Alpha2,
+  IsInt,
+} from 'class-validator';
 
 export class AddHolidaysDto {
-  // TODO:
-  // check API response
-  // ISO 3166-1 alpha-2 country code? Validation?
+  @IsISO31661Alpha2()
   @IsString()
   countryCode: string;
 
-  // Allowed range?
-  @IsNumber()
+  @IsInt()
   year: number;
 
   @IsString({ each: true })
