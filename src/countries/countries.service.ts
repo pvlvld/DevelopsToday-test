@@ -27,6 +27,13 @@ type ICountryFlagData = {
   iso3: string;
 };
 
+type ICountryInfoResponse = {
+  borders: {
+    name: string;
+  }[];
+  population: IPopulationCount[];
+  flag: string;
+};
 @Injectable()
 export class CountriesService {
   async getAvailableCountries() {
@@ -42,7 +49,7 @@ export class CountriesService {
     }
   }
 
-  async getCountryInfo(countryCode: string) {
+  async getCountryInfo(countryCode: string): Promise<ICountryInfoResponse> {
     countryCode = countryCode.toUpperCase();
 
     const [general, population, flag] = await Promise.all([
@@ -78,24 +85,28 @@ export class CountriesService {
     }
 
     const countryOfficialName = general?.officialName?.toUpperCase() || '';
-    const countryBorders =
-      general?.borders?.map((b) => ({ name: b.officialName })) || [];
-    const countryPopulation = population?.data?.find(
-      (c) => c.country.toUpperCase() === countryOfficialName,
+
+    const countryInfo = this.generateCountryInfo(
+      countryOfficialName,
+      general,
+      population?.data || [],
+      flag?.data || [],
     );
-    const populationCounts: IPopulationCount[] = Array.isArray(
-      countryPopulation?.populationCounts,
-    )
-      ? countryPopulation.populationCounts
-      : [];
-    const countryFlag = flag?.data?.find(
-      (c) => c.name.toUpperCase() === countryOfficialName,
-    ) as ICountryFlagData | undefined;
-    2;
+    return countryInfo;
+  }
+
+  private generateCountryInfo(
+    countryName: string,
+    general: Partial<ICountryInfo>,
+    population: ICountryPopulationData[],
+    flag: ICountryFlagData[],
+  ): ICountryInfoResponse {
     return {
-      borders: countryBorders,
-      population: populationCounts,
-      flag: countryFlag?.flag || '',
+      borders: general.borders?.map((b) => ({ name: b.officialName })) || [],
+      population:
+        population.find((c) => c.country === countryName)?.populationCounts ||
+        [],
+      flag: flag.find((c) => c.name === countryName)?.flag || '',
     };
   }
 }
