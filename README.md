@@ -131,14 +131,19 @@ npm install
 npx prisma migrate deploy
 ```
 
-### 4. Seed Testing Data
+### 4. Generating prisma client
+```bash
+npx prisma generate
+```
+
+### 5. Seed Testing Data
 
 ```bash
 npm run seed
 ```
 This will add a test user (id=1) and a couple of calendar events for him.
 
-### 5. Start the Application
+### 6. Start the Application
 
 - For development (with hot reload):
   ```bash
