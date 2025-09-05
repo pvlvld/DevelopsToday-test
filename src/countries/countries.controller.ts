@@ -7,7 +7,6 @@ export class CountriesController {
 
   @Get()
   getAvailableCountries() {
-    // https://date.nager.at/api/v3/AvailableCountries
     return this.countriesService.getAvailableCountries();
   }
 
