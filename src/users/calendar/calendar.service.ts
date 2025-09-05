@@ -64,7 +64,7 @@ export class CalendarService {
         );
       });
 
-    return { userId, ...data, saved: true };
+    return data.map((holiday) => holiday);
   }
 
   private async fetchHolidaysFromAPI(countryCode: string, year: number) {
