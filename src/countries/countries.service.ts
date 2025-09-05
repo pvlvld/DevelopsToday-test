@@ -1,5 +1,32 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
+type ICountryInfo = {
+  commonName: string;
+  officialName: string;
+  countryCode: string;
+  region: string;
+  borders: ICountryInfo[];
+};
+
+type IPopulationCount = {
+  year: number;
+  value: number;
+};
+
+type ICountryPopulationData = {
+  country: string;
+  code: string;
+  iso3: string;
+  populationCounts: IPopulationCount[];
+};
+
+type ICountryFlagData = {
+  name: string;
+  flag: string;
+  iso2: string;
+  iso3: string;
+};
+
 @Injectable()
 export class CountriesService {
   async getAvailableCountries() {
@@ -15,7 +42,60 @@ export class CountriesService {
     }
   }
 
-  getCountryInfo(countryCode: string) {
-    return {};
+  async getCountryInfo(countryCode: string) {
+    countryCode = countryCode.toUpperCase();
+
+    const [general, population, flag] = await Promise.all([
+      fetch(`https://date.nager.at/api/v3/CountryInfo/${countryCode}`).then(
+        (r) => r.json() as Promise<Partial<ICountryInfo>>,
+      ),
+      // API supports fetching single country but it's require country name not code
+      fetch(
+        `https://countriesnow.space/api/v0.1/countries/population`,
+        {},
+      ).then(
+        (r) => r.json() as Promise<Partial<{ data: ICountryPopulationData[] }>>,
+      ),
+      fetch(`https://countriesnow.space/api/v0.1/countries/flag/images`).then(
+        (r) => r.json() as Promise<Partial<{ data: ICountryFlagData[] }>>,
+      ),
+    ]);
+
+    if (!general) {
+      throw new InternalServerErrorException(
+        'Failed to fetch country general info',
+      );
+    }
+
+    if ('status' in general) {
+      if (general.status == 404) {
+        throw new InternalServerErrorException('Country not found');
+      } else {
+        throw new InternalServerErrorException(
+          'Failed to fetch country general info',
+        );
+      }
+    }
+
+    const countryOfficialName = general?.officialName?.toUpperCase() || '';
+    const countryBorders =
+      general?.borders?.map((b) => ({ name: b.officialName })) || [];
+    const countryPopulation = population?.data?.find(
+      (c) => c.country.toUpperCase() === countryOfficialName,
+    );
+    const populationCounts: IPopulationCount[] = Array.isArray(
+      countryPopulation?.populationCounts,
+    )
+      ? countryPopulation.populationCounts
+      : [];
+    const countryFlag = flag?.data?.find(
+      (c) => c.name.toUpperCase() === countryOfficialName,
+    ) as ICountryFlagData | undefined;
+    2;
+    return {
+      borders: countryBorders,
+      population: populationCounts,
+      flag: countryFlag?.flag || '',
+    };
   }
 }

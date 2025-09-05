@@ -12,9 +12,6 @@ export class CountriesController {
 
   @Get(':countryCode')
   getCountryInfo(@Param('countryCode') countryCode: string) {
-    // https://date.nager.at/api/v3/CountryInfo/UA
-    // https://countriesnow.space/api/v0.1/countries/population
-    // https://countriesnow.space/api/v0.1/countries/flag/images
     return this.countriesService.getCountryInfo(countryCode);
   }
 }
