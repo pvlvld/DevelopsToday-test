@@ -6,7 +6,7 @@ import { CalendarService } from './calendar/calendar.service';
 export class UsersService {
   constructor(private readonly calendarService: CalendarService) {}
 
-  async addHolidaysToCalendar(userId: string, dto: AddHolidaysDto) {
+  async addHolidaysToCalendar(userId: number, dto: AddHolidaysDto) {
     return this.calendarService.addHolidays(userId, dto);
   }
 }
