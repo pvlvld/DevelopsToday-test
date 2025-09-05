@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { AddHolidaysDto } from '../dto/add-holidays.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Holiday } from 'generated/prisma';
 import { Prisma } from 'generated/prisma';
 
 type IHolidayAPIInfo = {
@@ -25,16 +24,15 @@ export class CalendarService {
   constructor(private prisma: PrismaService) {}
 
   async addHolidays(userId: number, dto: AddHolidaysDto) {
-    const holidaysInfo = await fetch(
-      `https://date.nager.at/api/v3/PublicHolidays/${dto.year}/${dto.countryCode}`,
-    )
-      .then((r) => r.json() as Promise<IHolidayAPIInfo[]>)
-      .catch((error) => {
-        console.error('Error fetching holidays:', error);
-        throw new InternalServerErrorException(
-          'Failed to fetch holidays from external API',
-        );
-      });
+    const holidaysInfo = await this.fetchHolidaysFromAPI(
+      dto.countryCode,
+      dto.year,
+    ).catch((error) => {
+      console.error('Error fetching holidays from API:', error);
+      throw new InternalServerErrorException(
+        'Failed to fetch holidays from external API',
+      );
+    });
 
     if (!holidaysInfo || 'status' in holidaysInfo) {
       console.error('Error fetching holidays:', holidaysInfo);
@@ -49,22 +47,7 @@ export class CalendarService {
       );
     }
 
-    const data = [] as Prisma.HolidayCreateManyInput[];
-
-    for (const holiday of holidaysInfo) {
-      if (dto.holidays && !dto.holidays.includes(holiday.localName)) {
-        continue;
-      }
-
-      data.push({
-        name: holiday.name,
-        date: new Date(holiday.date),
-        localName: holiday.localName,
-        isGlobal: holiday.global,
-        countryCode: holiday.countryCode,
-        userId,
-      });
-    }
+    const data = this.mapAPIResponseToHolidays(userId, holidaysInfo);
 
     if (data.length === 0) {
       throw new NotFoundException(
@@ -82,5 +65,31 @@ export class CalendarService {
       });
 
     return { userId, ...data, saved: true };
+  }
+
+  private async fetchHolidaysFromAPI(countryCode: string, year: number) {
+    const response = await fetch(
+      `https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`,
+    );
+    if (!response.ok) {
+      throw new InternalServerErrorException(
+        'Failed to fetch holidays from external API',
+      );
+    }
+    return (await response.json()) as IHolidayAPIInfo[];
+  }
+
+  private mapAPIResponseToHolidays(
+    userId: number,
+    apiResponse: IHolidayAPIInfo[],
+  ): Prisma.HolidayCreateManyInput[] {
+    return apiResponse.map((holiday) => ({
+      name: holiday.name,
+      date: new Date(holiday.date),
+      localName: holiday.localName,
+      isGlobal: holiday.global,
+      countryCode: holiday.countryCode,
+      userId,
+    }));
   }
 }
