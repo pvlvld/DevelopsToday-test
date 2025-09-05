@@ -21,4 +21,15 @@ export class UsersService {
     }
     return this.calendarService.addHolidays(userId, dto);
   }
+
+  async getHolidaysFromCalendar(userId: number) {
+    const user = await this.getUserById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.prisma.holiday.findMany({
+      where: { userId },
+      orderBy: { date: 'asc' },
+    });
+  }
 }

@@ -1,4 +1,11 @@
-import { Controller, Post, Param, Body, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Param,
+  Body,
+  ParseIntPipe,
+  Get,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AddHolidaysDto } from './dto/add-holidays.dto';
 
@@ -12,5 +19,10 @@ export class UsersController {
     @Body() addHolidaysDto: AddHolidaysDto,
   ) {
     return this.usersService.addHolidaysToCalendar(userId, addHolidaysDto);
+  }
+
+  @Get(':userId/calendar/holidays')
+  async getHolidaysFromCalendar(@Param('userId', ParseIntPipe) userId: number) {
+    return this.usersService.getHolidaysFromCalendar(userId);
   }
 }
