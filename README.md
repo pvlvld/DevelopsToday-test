@@ -1,98 +1,157 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# DevelopsToday NestJS Project
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## API Documentation
 
-## Description
+### Base URL
+`/api`
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
+### Endpoints
+#### Get User Holidays
+**GET** `/api/users/{userId}/calendar/holidays`
 
-```bash
-$ npm install
+**Description:**
+Retrieve all holidays in the calendar for a specific user.
+
+**Path Parameters:**
+- `userId` (integer, required): User ID
+
+**Responses:**
+- `200 OK`: Array of holiday objects for the user
+- `404 Not Found`: User not found
+- `500 Internal Server Error`: Failed to fetch holidays
+
+---
+
+#### Add Holidays to User Calendar
+**POST** `/api/users/{userId}/calendar/holidays`
+
+**Description:**
+Add public holidays for a given country and year to a user's calendar. Optionally, specify a list of holiday names to filter which holidays are added.
+
+**Path Parameters:**
+- `userId` (integer, required): User ID
+
+**Request Body:**
+```json
+{
+  "countryCode": "US",         // string, ISO 3166-1 alpha-2 country code, required
+  "year": 2025,                 // integer, required
+  "holidays": ["New Year's Day", "Independence Day"] // array of strings, optional
+}
 ```
 
-## Compile and run the project
+**Responses:**
+- `200 OK`: List of added holidays
+- `404 Not Found`: User not found or no holidays found
+- `500 Internal Server Error`: Failed to fetch or save holidays
 
+---
+
+#### Get Available Countries
+**GET** `/api/countries`
+
+**Description:**
+Get a list of available countries for which public holiday data is available.
+
+**Responses:**
+- `200 OK`: Array of countries with country codes and names
+- `500 Internal Server Error`: Failed to fetch available countries
+
+---
+
+#### Get Country Info
+**GET** `/api/countries/{countryCode}`
+
+**Description:**
+Get detailed information about a country, including borders, population, and flag.
+
+**Path Parameters:**
+- `countryCode` (string, ISO 3166-1 alpha-2, required): Country code
+
+**Responses:**
+- `200 OK`: Country info object
+- `500 Internal Server Error`: Failed to fetch country info
+
+---
+
+## Example Usage
+
+Add holidays to user calendar:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+curl -X POST \
+  http://localhost:3000/api/users/1/calendar/holidays \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "countryCode": "US",
+    "year": 2025,
+    "holidays": ["New Year's Day"]
+  }'
 ```
 
-## Run tests
-
+Get available countries:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl http://localhost:3000/api/countries
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+Get country info:
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl http://localhost:3000/api/countries/US
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Overview
+This project is a NestJS server-side application using PostgreSQL as the database. It is set up for local development with Docker and Prisma ORM.
 
-## Resources
+## Prerequisites
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- [npm](https://www.npmjs.com/)
+- [Docker](https://www.docker.com/) (for local PostgreSQL)
 
-Check out a few resources that may come in handy when working with NestJS:
+## Getting Started
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 1. Start PostgreSQL with Docker Compose
+Run the following command to start a local PostgreSQL instance:
 
-## Support
+```bash
+docker compose up -d
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+This uses the configuration in `docker-compose.yml` and exposes the database on `localhost:5432`.
 
-## Stay in touch
+### 2. Install Dependencies
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npm install
+```
 
-## License
+### 3. Run Database Migrations
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npx prisma migrate deploy
+```
+
+### 4. Seed Testing Data
+
+```bash
+npm run seed
+```
+This will add a test user (id=1) and a couple of calendar events for him.
+
+### 5. Start the Application
+
+- For development (with hot reload):
+  ```bash
+  npm run start:dev
+  ```
+- For production:
+  ```bash
+  npm run start:prod
+  ```
+
+The application will connect to the database started by Docker Compose.
+
+## Notes
+- The database data is persisted in the `postgres_data/` directory.
+- Working .env file was added as per task requirements.
+- Husky is configured with a pre-commit hook to automatically format all staged files before each commit.
