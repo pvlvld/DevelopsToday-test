@@ -13,3 +13,19 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id       Int       @id @default(autoincrement())
+  holidays Holiday[]
+}
+
+model Holiday {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  localName   String   @db.VarChar(128)
+  name        String   @db.VarChar(128)
+  isGlobal    Boolean
+  countryCode String   @db.Char(2)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+}
